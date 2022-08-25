@@ -5,11 +5,11 @@
 <br>
 
 ## Before you begin:
-> ### Ensure that you have [renv](https://rstudio.github.io/renv/index.html) installed as this will the main environment management tool used in this workflow. The packages used in the analysis can be easily obtained with `renv::restore()` and this will download them by referencing the `renv.lock` file.
+>  Ensure that you have [renv](https://rstudio.github.io/renv/index.html) installed as this will the main environment management tool used in this workflow. The packages used in the analysis can be easily obtained with `renv::restore()` and this will download them by referencing the `renv.lock` file.
 
-> ### Although this is not a standalone package for bulk RNA-seq analysis but more of a pipeline that integrates multiple tools together, there are some helper functions that were written as R source code within the `/src` directory. In order to load them for use in the analysis, run `source(here::here("src", "RNA_seq_helper_functions.R"))` at the start of each Rmd notebook to ensure the necessary helper functions are loaded too.
+> Although this is not a standalone package for bulk RNA-seq analysis but more of a pipeline that integrates multiple tools together, there are some helper functions that were written as R source code within the `/src` directory. In order to load them for use in the analysis, run `source(here::here("src", "RNA_seq_helper_functions.R"))` at the start of each Rmd notebook to ensure the necessary helper functions are loaded too.
 
-> ### The read count data and metadata are expected to come from the outputs of [STAR](https://github.com/alexdobin/STAR). As such the format for the data would be a a number of `_outputs_ReadsPerGene.out.tab` files which should be place in the `/data` folder and a tab delimited metadata text while which the user has to write for DESeq2 to build it's deseq_object.
+> The read count data and metadata are expected to come from the outputs of [STAR](https://github.com/alexdobin/STAR). As such the format for the data would be a a number of `_outputs_ReadsPerGene.out.tab` files which should be place in the `/data` folder and a tab delimited metadata text while which the user has to write for DESeq2 to build it's deseq_object.
 <br>
 
     ──RNA-seq-analysis
@@ -23,7 +23,8 @@
             ├──Treatment_3_outputs_ReadsPerGene.out.tab
             ├──Treatment_4_outputs_ReadsPerGene.out.tab
             └──treatment_vs_control.meta
-> ### For the metadata file `treatment_vs_control.meta`, ensure that the row-names match the sample names of the individual RNA-seq samples.
+> For the metadata file `treatment_vs_control.meta`, ensure that the row-names match the sample names of the individual RNA-seq samples.
+
           -------------   -------------   ------------- 
         |               | sampletype    | phenotype     |
         | ------------- | ------------- | ------------- |
