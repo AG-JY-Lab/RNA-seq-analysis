@@ -16,14 +16,14 @@
 
     ──RNA-seq-analysis
         └──data
-            ├──Control_1_outputs_ReadsPerGene.out.tab
-            ├──Control_2_outputs_ReadsPerGene.out.tab
-            ├──Control_3_outputs_ReadsPerGene.out.tab
-            ├──Control_4_outputs_ReadsPerGene.out.tab
-            ├──Treatment_1_outputs_ReadsPerGene.out.tab
-            ├──Treatment_2_outputs_ReadsPerGene.out.tab
-            ├──Treatment_3_outputs_ReadsPerGene.out.tab
-            ├──Treatment_4_outputs_ReadsPerGene.out.tab
+            ├──Wildtype_1_outputs_ReadsPerGene.out.tab
+            ├──Wildtype_2_outputs_ReadsPerGene.out.tab
+            ├──Wildtype_3_outputs_ReadsPerGene.out.tab
+            ├──Wildtype_4_outputs_ReadsPerGene.out.tab
+            ├──Gene_xyz_KO_1_outputs_ReadsPerGene.out.tab
+            ├──Gene_xyz_KO_2_outputs_ReadsPerGene.out.tab
+            ├──Gene_xyz_KO_3_outputs_ReadsPerGene.out.tab
+            ├──Gene_xyz_KO_4_outputs_ReadsPerGene.out.tab
             └──treatment_vs_control.meta
 > For the metadata file `treatment_vs_control.meta`, ensure that the row-names match the sample names of the individual RNA-seq samples.
 
@@ -40,11 +40,11 @@
         | ------------- | ------------- | ------------- |
         | Gene_xyz_KO_1 | Treatment     | proliferative |
         | ------------- | ------------- | ------------- |
-        | Gene_xyz_KO_  | Treatment     | proliferative |
+        | Gene_xyz_KO_2 | Treatment     | proliferative |
         | ------------- | ------------- | ------------- |
-        | Treatment_3   | Treatment     | proliferative |
+        | Gene_xyz_KO_3 | Treatment     | proliferative |
         | ------------- | ------------- | ------------- |
-        | Treatment_4   | Treatment     | proliferative |
+        | Gene_xyz_KO_4 | Treatment     | proliferative |
           -------------   -------------   ------------- 
 
 
