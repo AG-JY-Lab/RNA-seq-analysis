@@ -1,7 +1,7 @@
 ---
 title: "4 - Visualization of DEGs"
 author: "Joshua Soon"
-date: '2022-06-5'
+date: '26 August 2022'
 output: html_document
 editor_options: 
   chunk_output_type: console

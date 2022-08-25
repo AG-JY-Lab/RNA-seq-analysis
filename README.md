@@ -141,7 +141,9 @@
 
 - The significant differentially expressed genes can be visualised as a bar-plot, volcano plot and a heatmap.
 
-![](./images/heatmap.png)
+![](./images/heatmap.png) 
+
+- Above is an example of a heatmap of significant differentially expressed genes.
 
     ### Dependencies:
 
