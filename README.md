@@ -139,7 +139,23 @@
 
 ### 4. Visualization of DEGs
 
-- Some explanation
+- The significant differentially expressed genes can be visualised as a bar-plot, volcano plot and a heatmap.
+
+![](./images/heatmap.png)
+
+    ### Dependencies:
+
+    - [ggplot2](https://ggplot2.tidyverse.org/)
+
+    - [ggrepel](https://cran.r-project.org/web/packages/ggrepel/)
+
+    - [ComplexHeatmap](https://www.bioconductor.org/packages/release/bioc/html/ComplexHeatmap.html)
+
+    - [circlize](https://cran.r-project.org/web/packages/circlize/)
+
+    - [RColorBrewer](https://cran.r-project.org/web/packages/RColorBrewer/)
+
+    - [tidyverse](https://www.tidyverse.org/)
 
 <br>
 

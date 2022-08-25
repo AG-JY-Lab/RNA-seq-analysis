@@ -1,0 +1,152 @@
+---
+title: "3 - Model fitting and hypothesis testing"
+author: "Joshua Soon"
+date: '25 August 2022'
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+Default dependencies here and yaml are required for config.yml parsing to obtain parameters.
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(here)
+library(yaml)
+```
+
+
+
+Load the packages for this specific Rmd notebook.
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(DESeq2)
+library(apeglm)
+library(dplyr)
+library(tidyverse)
+```
+
+
+
+Run differential expression testing
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+RNA_seq_dds <- DESeq(RNA_seq_dds)
+```
+
+
+
+Plot dispersion estimates
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+plotDispEsts(RNA_seq_dds)
+```
+
+
+
+Define contrasts, extract results table, and shrink the log2 fold changes, specify groups for comparison
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+RNA_seq_res_table_unshrunken <- results(RNA_seq_dds,
+                                        contrast=c("sampletype", "Treatment", "Control"),
+                                        alpha = 0.05,
+                                        pAdjustMethod = "BH")
+resultsNames(RNA_seq_dds)
+RNA_seq_res_table <- lfcShrink(RNA_seq_dds, coef="sampletype_Treatment_vs_Control", type="apeglm")
+RNA_seq_res_table
+```
+log2 fold change (MAP): sampletype Treatment vs Control 
+Wald test p-value: sampletype Treatment vs Control 
+DataFrame with 61552 rows and 5 columns
+                   baseMean log2FoldChange     lfcSE      pvalue        padj
+                  <numeric>      <numeric> <numeric>   <numeric>   <numeric>
+ENSG00000000003 3138.664497       0.206054 0.0470326 1.14661e-05 3.47491e-05
+ENSG00000000005    0.461204      -0.240852 0.8702479 4.22543e-01          NA
+ENSG00000000419 5636.849907       0.276653 0.0463835 2.17229e-09 8.51697e-09
+ENSG00000000457  562.404925      -0.555599 0.0855839 6.68317e-11 2.84513e-10
+ENSG00000000460 1625.681979      -0.247986 0.0543642 4.81894e-06 1.50737e-05
+...                     ...            ...       ...         ...         ...
+ENSG00000289714    0.000000             NA        NA          NA          NA
+ENSG00000289715    0.000000             NA        NA          NA          NA
+ENSG00000289716    0.672098      -0.281907  0.889301    0.302046          NA
+ENSG00000289718    0.000000             NA        NA          NA          NA
+ENSG00000289719   14.023868      -0.294111  0.442536    0.431778    0.538105
+
+
+
+MA plot
+Specifically call the DESeq2 version of plotMA, if not it would call the plotMA from limma.
+https://rdrr.io/bioc/limma/man/plotma.html
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+DESeq2::plotMA(RNA_seq_res_table_unshrunken, ylim=c(-4, 4))
+DESeq2::plotMA(RNA_seq_res_table, ylim=c(-4, 4))
+```
+
+
+
+Inspect DE results
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+mcols(RNA_seq_res_table, use.names=T)
+RNA_seq_res_table %>% data.frame() %>% View()
+```
+
+
+
+Plot counts of a specific gene
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+plotCounts(RNA_seq_dds, gene="ENSG00000132170", intgroup="sampletype")
+```
+
+
+
+Summarize results and preview
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+summary(RNA_seq_res_table)
+RNA_seq_res05 <- results(RNA_seq_dds, alpha=0.05)
+summary(RNA_seq_res05)
+```
+out of 41142 with nonzero total read count
+adjusted p-value < 0.05
+LFC > 0 (up)       : 7570, 18%
+LFC < 0 (down)     : 9321, 23%
+outliers [1]       : 0, 0%
+low counts [2]     : 9322, 23%
+(mean count < 1)
+
+
+
+Set thresholds for Fold change and adjusted p-value
+For Rh30
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+FC1.2 <- 0.263 # The equivalent log2FC for both
+FC1.5 <- 0.585
+FC2.0 <- 1
+padj_cutoff <- 0.05
+l2fc_cutoff <- FC2.0
+RNA_seq_res_table_tb <- RNA_seq_res_table %>% data.frame() %>% rownames_to_column(var="Ensembl ID") %>% as_tibble()
+RNA_seq_sigDEGS <- RNA_seq_res_table_tb %>% filter(padj < padj_cutoff & abs(log2FoldChange) > l2fc_cutoff)
+RNA_seq_sigDEGS
+```
+# A tibble: 7,281 × 6
+   `Ensembl ID`    baseMean log2FoldChange  lfcSE    pvalue      padj
+   <chr>              <dbl>          <dbl>  <dbl>     <dbl>     <dbl>
+ 1 ENSG00000001461     5.55          -2.25 1.02   3.11e-  3 7.16e-  3
+ 2 ENSG00000001617   865.            -1.62 0.0734 7.39e-109 3.48e-107
+ 3 ENSG00000002079    18.9           -2.61 0.573  5.64e-  7 1.89e-  6
+ 4 ENSG00000002726     2.29          -2.09 1.98   1.30e-  2 2.69e-  2
+ 5 ENSG00000002745    32.0           -1.51 0.428  8.93e-  5 2.49e-  4
+ 6 ENSG00000002834  4621.             1.01 0.0569 2.60e- 71 6.01e- 70
+ 7 ENSG00000003096  3221.             1.72 0.0513 3.79e-248 9.88e-246
+ 8 ENSG00000003137   777.             1.04 0.0763 1.10e- 42 1.31e- 41
+ 9 ENSG00000003147     4.76          -2.56 1.19   3.10e-  3 7.14e-  3
+10 ENSG00000003249  1146.             1.36 0.0904 1.32e- 51 1.95e- 50
+
+
+
+Export DESeq2 results as csv file
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+##################################
+### Do not commit this to Git! ###
+##################################
+
+# For all genes:
+write.csv(as.data.frame(RNA_seq_res_table_tb), file="all_genes_Rh30_Ts_vs_Ad.csv")
+# For genes that pass the cut-offs above:
+write.csv(as.data.frame(RNA_seq_sigDEGS), file="FC>2_padj<05_Rh30_Ts_vs_Ad.csv")
+```
