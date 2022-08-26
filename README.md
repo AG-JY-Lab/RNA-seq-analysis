@@ -7,12 +7,13 @@
 <br>
 
 ## Before you begin:
->  Ensure that you have [renv](https://rstudio.github.io/renv/index.html) installed as this will the main environment management tool used in this workflow. The packages used in the analysis can be easily obtained with `renv::restore()` and this will download them by referencing the `renv.lock` file.
+
+> Ensure that you have [renv](https://rstudio.github.io/renv/index.html) installed as this will the main environment management tool used in this workflow. The packages used in the analysis can be easily obtained with `renv::restore()` and this will download them by referencing the `renv.lock` file.
 
 > Although this is not a standalone package for bulk RNA-seq analysis but more of a pipeline that integrates multiple tools together, there are some helper functions that were written as R source code within the `/src` directory. In order to load them for use in the analysis, run `source(here::here("src", "RNA_seq_helper_functions.R"))` at the start of each Rmd notebook to ensure the necessary helper functions are loaded too.
 
 > The read count data and metadata are expected to come from the outputs of [STAR](https://github.com/alexdobin/STAR). As such the format for the data would be a a number of `_outputs_ReadsPerGene.out.tab` files which should be place in the `/data` folder and a tab delimited metadata text while which the user has to write for DESeq2 to build it's deseq_object.
-<br>
+> <br>
 
     ──RNA-seq-analysis
         └──data
@@ -25,9 +26,10 @@
             ├──Gene_xyz_KO_3_outputs_ReadsPerGene.out.tab
             ├──Gene_xyz_KO_4_outputs_ReadsPerGene.out.tab
             └──treatment_vs_control.meta
+
 > For the metadata file `treatment_vs_control.meta`, ensure that the row-names match the sample names of the individual RNA-seq samples.
 
-          -------------   -------------   ------------- 
+          -------------   -------------   -------------
         |               | sampletype    | phenotype     |
         | ------------- | ------------- | ------------- |
         | Wildtype_1    | Control       | quiescent     |
@@ -45,9 +47,26 @@
         | Gene_xyz_KO_3 | Treatment     | proliferative |
         | ------------- | ------------- | ------------- |
         | Gene_xyz_KO_4 | Treatment     | proliferative |
-          -------------   -------------   ------------- 
+          -------------   -------------   -------------
 
+> Within the `config.yml` file, ensure that the order of sample naming matches the metadata file. This would be the order that the read count data is read into R and merged into the count `data.frame`. For the example metadata file above, the config file should look like:
 
+```yaml
+Paths:
+  Treatment_vs_control_meta: "./data/treatment_vs_control.meta"
+  Treatment_vs_control_data: "./data"
+
+Samples:
+  Treatment_vs_control:
+    Wildtype_1: "Wildtype_1"
+    Wildtype_2: "Wildtype_2"
+    Wildtype_3: "Wildtype_3"
+    Wildtype_4: "Wildtype_4"
+    Gene_xyz_KO_1: "Gene_xyz_KO_1"
+    Gene_xyz_KO_2: "Gene_xyz_KO_2"
+    Gene_xyz_KO_3: "Gene_xyz_KO_3"
+    Gene_xyz_KO_4: "Gene_xyz_KO_4"
+```
 
 <br>
 
@@ -60,11 +79,11 @@
 - The RNA seq count data was obtained by running STAR aligner with `--quantMode GeneCounts` enabled, which outputs the gene counts as a tab delimited file.
 - Each file is then merged into a master data frame with its respective sample name as the column name.
 
-    ### Dependencies:
+  ### Dependencies:
 
-    - [here](https://cran.r-project.org/web/packages/here/)
+  - [here](https://cran.r-project.org/web/packages/here/)
 
-    - [yaml](https://cran.r-project.org/web/packages/yaml/)
+  - [yaml](https://cran.r-project.org/web/packages/yaml/)
 
 <br>
 
@@ -76,23 +95,23 @@
 - An option for CPM filtering with edgeR is also included.
 - The size factors for DESeq2 normalisation are calculated during the initializtion of the DESeq2 object and the DESeq2 normalised counts can be written out to disk.
 
-    ### Dependencies:
+  ### Dependencies:
 
-    - [yaml](https://cran.r-project.org/web/packages/yaml/)
+  - [yaml](https://cran.r-project.org/web/packages/yaml/)
 
-    - [tidyverse](https://www.tidyverse.org/)
+  - [tidyverse](https://www.tidyverse.org/)
 
-    - [DESeq2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)
+  - [DESeq2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)
 
-    - [edgeR](https://bioconductor.org/packages/release/bioc/html/edgeR.html)
+  - [edgeR](https://bioconductor.org/packages/release/bioc/html/edgeR.html)
 
-    - [ggplot2](https://ggplot2.tidyverse.org/)
+  - [ggplot2](https://ggplot2.tidyverse.org/)
 
-    - [pheatmap](https://cran.r-project.org/web/packages/pheatmap/)
+  - [pheatmap](https://cran.r-project.org/web/packages/pheatmap/)
 
-    - [ggrepel](https://cran.r-project.org/web/packages/ggrepel/)
+  - [ggrepel](https://cran.r-project.org/web/packages/ggrepel/)
 
-    - [RColorBrewer](https://cran.r-project.org/web/packages/RColorBrewer/)
+  - [RColorBrewer](https://cran.r-project.org/web/packages/RColorBrewer/)
 
 <br>
 
@@ -101,15 +120,15 @@
 - This step performs log transformation of the count data for PCA and other correlative visualisations.
 - Hierarchical clustering and a heatmap of pairwise correlation values of the gene wise counts per sample is performed to show how each sample relates to another. Ideally, samples within each condition should show the highest similarity to one another and most difference to those of the other condition.
 
-    ### Dependencies:
+  ### Dependencies:
 
-    - [ggplot2](https://ggplot2.tidyverse.org/)
+  - [ggplot2](https://ggplot2.tidyverse.org/)
 
-    - [pheatmap](https://cran.r-project.org/web/packages/pheatmap/)
+  - [pheatmap](https://cran.r-project.org/web/packages/pheatmap/)
 
-    - [ggrepel](https://cran.r-project.org/web/packages/ggrepel/)
+  - [ggrepel](https://cran.r-project.org/web/packages/ggrepel/)
 
-    - [RColorBrewer](https://cran.r-project.org/web/packages/RColorBrewer/)
+  - [RColorBrewer](https://cran.r-project.org/web/packages/RColorBrewer/)
 
 <br>
 
@@ -120,20 +139,19 @@
 - The MA plot can be visualised here as well as a quick summary of the differential expression results.
 - After setting a Log2FoldChange threshold, the differentially expressed genes can be exported as a CSV file.
 
+  ### Dependencies:
 
-    ### Dependencies:
+  - [here](https://cran.r-project.org/web/packages/here/)
 
-    - [here](https://cran.r-project.org/web/packages/here/)
+  - [yaml](https://cran.r-project.org/web/packages/yaml/)
 
-    - [yaml](https://cran.r-project.org/web/packages/yaml/)
+  - [DESeq2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)
 
-    - [DESeq2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)
+  - [apeglm](https://bioconductor.org/packages/release/bioc/html/apeglm.html)
 
-    - [apeglm](https://bioconductor.org/packages/release/bioc/html/apeglm.html)
+  - [dplyr](https://dplyr.tidyverse.org/)
 
-    - [dplyr](https://dplyr.tidyverse.org/)
-
-    - [tidyverse](https://www.tidyverse.org/)
+  - [tidyverse](https://www.tidyverse.org/)
 
 <br>
 
@@ -141,23 +159,23 @@
 
 - The significant differentially expressed genes can be visualised as a bar-plot, volcano plot and a heatmap.
 
-![](./images/heatmap.png) 
+![](./images/heatmap.png)
 
 - Above is an example of a heatmap of significant differentially expressed genes.
 
-    ### Dependencies:
+  ### Dependencies:
 
-    - [ggplot2](https://ggplot2.tidyverse.org/)
+  - [ggplot2](https://ggplot2.tidyverse.org/)
 
-    - [ggrepel](https://cran.r-project.org/web/packages/ggrepel/)
+  - [ggrepel](https://cran.r-project.org/web/packages/ggrepel/)
 
-    - [ComplexHeatmap](https://www.bioconductor.org/packages/release/bioc/html/ComplexHeatmap.html)
+  - [ComplexHeatmap](https://www.bioconductor.org/packages/release/bioc/html/ComplexHeatmap.html)
 
-    - [circlize](https://cran.r-project.org/web/packages/circlize/)
+  - [circlize](https://cran.r-project.org/web/packages/circlize/)
 
-    - [RColorBrewer](https://cran.r-project.org/web/packages/RColorBrewer/)
+  - [RColorBrewer](https://cran.r-project.org/web/packages/RColorBrewer/)
 
-    - [tidyverse](https://www.tidyverse.org/)
+  - [tidyverse](https://www.tidyverse.org/)
 
 <br>
 
