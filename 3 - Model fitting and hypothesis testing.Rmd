@@ -41,10 +41,13 @@ plotDispEsts(RNA_seq_dds)
 
 
 
-Define contrasts, extract results table, and shrink the log2 fold changes, specify groups for comparison
+Define contrasts, extract results table, and shrink the log2 fold changes, specify groups for comparison.
+From the option of edgeR CPM filtered gene counts, the DESeq2 results can have its argument for independent filtering to be toggled off by setting independentFiltering = False. Essentially this is a boolean argument of whether independent filtering should be applied automatically.
+See https://rdrr.io/bioc/DESeq2/man/results.html for a full explanation of all arguments in the DESeq2::results() function.
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 RNA_seq_res_table_unshrunken <- results(RNA_seq_dds,
                                         contrast=c("sampletype", "Treatment", "Control"),
+                                        independentFiltering = TRUE,
                                         alpha = 0.05,
                                         pAdjustMethod = "BH")
 resultsNames(RNA_seq_dds)
