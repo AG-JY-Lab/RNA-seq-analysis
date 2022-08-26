@@ -2,7 +2,7 @@
 
 ![](./images/rnaseq.png)
 
-### This repository maintains and end to end downstream workflow of bulk RNA sequencing analysis from gene read counts to functional enrichment analysis.
+### This repository maintains an end to end downstream workflow (post FASTQ alignment) of bulk RNA sequencing analysis from gene read counts to functional enrichment analysis.
 
 <br>
 
