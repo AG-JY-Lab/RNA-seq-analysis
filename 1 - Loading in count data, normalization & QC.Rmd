@@ -21,7 +21,7 @@ Load the packages for this specific Rmd notebook.
 library(tidyverse)
 library(DESeq2)
 library(edgeR)
-library(ggplot)
+library(ggplot2)
 ```
 
 
@@ -118,8 +118,8 @@ ggplot(RNA_seq_counts_final) +
 
 
 
-Modeling count data for Tumour spheres and Adherent conditions.
-For RNA-seq with 4 treatment and 4 control, treatment = columns 1:4, treatment = control 5:8
+Modeling count data for Treatment and Control conditions.
+For RNA-seq with 4 treatment and 4 control, treatment = columns 1:4, treatment = columns 5:8
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 treatment_mean_counts <- apply(RNA_seq_counts_final[, 1:4], 1, mean) # Control means
 treatment_variance_counts <- apply(RNA_seq_counts_final[, 1:4], 1, var) # Control Variance
@@ -146,16 +146,19 @@ ggplot(control_variance_vs_means) +
 
 
 
+###################
+## Optional part ##
+###################
+
 Filter out low read-counts before creating DESeq2Dataset object
 This is done with edgeR's cpm function.
-Rh30 low CPM filtering
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 RNA_seq_edgeR_DEG <- DGEList(RNA_seq_counts_final)
 
 # Calculate normalization factors
 RNA_seq_edgeR_DEG <- calcNormFactors(RNA_seq_edgeR_DEG)
 
-# Filter low-expressed genes, less than 1 cpm (counts per million)
+# Filter low-expressed genes, less than 0.2 cpm (counts per million)
 cpm_cutoff <- 0.2
 
 # Min cpm of each row of cpm(gene_counts), that is less than cutoff
@@ -173,9 +176,9 @@ On some biostars forum posts, it is not recommended to do any form of CPM filter
 does some form internal filtering before fitting its model. For edgeR, this filtering is needed as it is well described in
 their vignette. 
 
-So both options to add CPM filtering or use the raw counts straight into DESeq2 can be tried. For this, the variable "RNA_seq_final" can be swapped for "RNA_seq_counts_filtered" to use the CPM filtered one instead.
+So both options to add CPM filtering or use the raw counts straight into DESeq2 can be tried. For this, the variable "RNA_seq_counts_final" can be swapped for "RNA_seq_cpm_filtered" to use the CPM filtered one instead.
 
-Rh30 DESeq2 object
+DESeq2 object
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 ### Create DESeq2Dataset object
 RNA_seq_dds <- DESeqDataSetFromMatrix(countData = round(RNA_seq_counts_final), colData = RNA_seq_metadata, design = ~ sampletype)

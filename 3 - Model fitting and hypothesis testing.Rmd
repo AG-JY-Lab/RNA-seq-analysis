@@ -112,7 +112,6 @@ low counts [2]     : 9322, 23%
 
 
 Set thresholds for Fold change and adjusted p-value
-For Rh30
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 FC1.2 <- 0.263 # The equivalent log2FC for both
 FC1.5 <- 0.585
@@ -146,7 +145,7 @@ Export DESeq2 results as csv file
 ##################################
 
 # For all genes:
-write.csv(as.data.frame(RNA_seq_res_table_tb), file="all_genes_Rh30_Ts_vs_Ad.csv")
+write.csv(as.data.frame(RNA_seq_res_table_tb), file="all_genes_Treatment_vs_Control.csv")
 # For genes that pass the cut-offs above:
-write.csv(as.data.frame(RNA_seq_sigDEGS), file="FC>2_padj<05_Rh30_Ts_vs_Ad.csv")
+write.csv(as.data.frame(RNA_seq_sigDEGS), file="FC>2_padj<05_Treatment_vs_Control.csv")
 ```
