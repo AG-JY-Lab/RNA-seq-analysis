@@ -1,7 +1,7 @@
 ---
 title: "5 - Post DESeq2 filtering and result annotation"
 author: "Joshua Soon"
-date: '27 August 2022'
+date: '28 August 2022'
 output: html_document
 editor_options: 
   chunk_output_type: console
@@ -27,9 +27,6 @@ Load the packages for this specific Rmd notebook.
 library(org.Hs.eg.db)
 library(tidyverse)
 library(dplyr)
-
-columns(org.Hs.eg.db)
-
 library(edgeR)
 ```
 
@@ -40,23 +37,35 @@ source(here::here("src", "gsea_helpers.R"))
 
 
 Drop those genes which fail to meet the low CPM cutoff.
+RNA-seq differential expression results (DE) with and without low CPM filtering.
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-res_table_rn_cpm_filtered <- subset(res_table_rn, !(rownames(res_table_rn) %in% names(genes_to_drop)))
+RNA_seq_DE_cpm_filtered <- subset(RNA_seq_DE_table_rn, !(rownames(RNA_seq_DE_table_rn) %in% names(genes_to_drop)))
 ```
 
 
 
 Annotate the DESeq2 results with Gene symbols, Entrez IDs and brief gene descriptions
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
+# For CPM filtered DE results:
 res_annotations <- AnnotationDbi::select(org.Hs.eg.db,
-                                         keys = rownames(res_table_rn_cpm_filtered),
+                                         keys = rownames(RNA_seq_DE_cpm_filtered),
                                          columns = c ("SYMBOL", "ENTREZID", "GENENAME"),
                                          keytype = "ENSEMBL") 
 
-results_annotated <- merge(res_table_rn_cpm_filtered, res_annotations, by.x=0, by.y="ENSEMBL")
+RNA_seq_DE_cpm_filtered_annotated <- merge(RNA_seq_DE_cpm_filtered, res_annotations, by.x=0, by.y="ENSEMBL")
 
 # Save outputs to a CSV file
-write.csv(results_annotated, "./RNA_seq_differential_expression.csv", row.names = FALSE)
+write.csv(RNA_seq_DE_cpm_filtered_annotated, "./RNA_seq_differential_expression_cpm_filtered.csv", row.names = FALSE)
+
+# For non filtered DE results:
+all_res_annotations <- AnnotationDbi::select(org.Hs.eg.db,
+                                             keys = rownames(RNA_seq_DE_table_rn),
+                                             columns = c ("SYMBOL", "ENTREZID", "GENENAME"),
+                                             keytype = "ENSEMBL") 
+
+RNA_seq_DE_annotated <- merge(RNA_seq_DE_table_rn, all_res_annotations, by.x=0, by.y="ENSEMBL")
+
+write.csv(RNA_seq_DE_annotated, "./RNA_seq_differential_expression.csv", row.names = FALSE)
 ```
 
 
@@ -75,10 +84,16 @@ l2fc_cutoff <- 1
 
 # Only retain genes that are above a 0.2 CPM, below 0.05 for their adjusted p-value
 # and are differentially expressed greater than a Fold Change of 2 (L2FC = 1).
-results_annotated_sigDEGS <- results_annotated %>% dplyr::filter(padj < padj_cutoff & abs(log2FoldChange) > l2fc_cutoff)
-View(results_annotated_sigDEGS)
+RNA_seq_DE_annotated_sigDEGS <- RNA_seq_DE_annotated %>% dplyr::filter(padj < padj_cutoff & abs(log2FoldChange) > l2fc_cutoff)
+View(RNA_seq_DE_annotated_sigDEGS)
 
-write.csv(results_annotated_sigDEGS, "./RNA_seq_annotated_sigDEGS.csv", row.names = FALSE)
+RNA_seq_DE_annotated_sigDEGS_cpm_filtered <- RNA_seq_DE_cpm_filtered_annotated %>% dplyr::filter(
+  padj < padj_cutoff 
+  & abs(log2FoldChange) > l2fc_cutoff
+  )
+View(RNA_seq_DE_annotated_sigDEGS_cpm_filtered)
+
+write.csv(RNA_seq_DE_annotated_sigDEGS, "./RNA_seq_annotated_sigDEGS.csv", row.names = FALSE)
 ```
 
 

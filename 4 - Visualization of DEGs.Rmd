@@ -30,8 +30,8 @@ library(tidyverse)
 
 DEG Bar graph
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-DEGs_up <- RNA_seq_sigDEGS %>% filter(log2FoldChange > 0)
-DEGs_down <- RNA_seq_sigDEGS %>% filter(log2FoldChange < 0)
+DEGs_up <- RNA_seq_sig_DEGS %>% filter(log2FoldChange > 0)
+DEGs_down <- RNA_seq_sig_DEGS %>% filter(log2FoldChange < 0)
 
 number_genes_up <- length(DEGs_up$`Ensembl ID`)
 number_genes_down <- length(DEGs_down$`Ensembl ID`)
@@ -59,11 +59,11 @@ DEG Volcano plot
 options(ggrepel.max.overlaps = Inf)
 
 # Extract the relevant columns from the data-frame output of DESeq2 results
-res_table_rn <- RNA_seq_res_table_tb %>% column_to_rownames(var = "Ensembl ID")
-genes <- rownames(res_table_rn)
+RNA_seq_DE_table_rn <- RNA_seq_DE_table %>% column_to_rownames(var = "Ensembl ID")
+genes <- rownames(RNA_seq_DE_table_rn)
 volcano_plot_data <- data.frame(genes,
-                                log2FC = res_table_rn[,2] ,
-                                logqval = -log10(res_table_rn[,5]))
+                                log2FC = RNA_seq_DE_table_rn[,2] ,
+                                logqval = -log10(RNA_seq_DE_table_rn[,5]))
 
 # Add a column of differential expression indicators
 volcano_plot_data$diffexpressed <- "Not sig"
@@ -138,32 +138,32 @@ RNA_seq_normalized_counts_df <- RNA_seq_normalized_counts %>%
   as_tibble()
 
 # Extract normalized expression for significant genes from the, and set the gene column (1) to row names
-normalized_DEGs_df <- RNA_seq_normalized_counts_df[,c(1:9)] %>% 
-  filter(`Ensembl ID` %in% RNA_seq_sigDEGS$`Ensembl ID`) %>% 
+RNA_seq_normalized_DEGs_df <- RNA_seq_normalized_counts_df[,c(1:9)] %>% 
+  filter(`Ensembl ID` %in% RNA_seq_sig_DEGS$`Ensembl ID`) %>% 
   data.frame() %>%
   column_to_rownames(var = "Ensembl.ID")
 
 # Run ComplexHeatmap
-normalized_DEGs_matrix <- as.matrix(normalized_DEGs_df[, grep("_", colnames(normalized_DEGs_df))])
-base_mean = rowMeans(normalized_DEGs_matrix)
-matrix_scaled = t(apply(normalized_DEGs_matrix, 1, scale))
+RNA_seq_normalized_DEGs_matrix <- as.matrix(RNA_seq_normalized_DEGs_df[, grep("_", colnames(RNA_seq_normalized_DEGs_df))])
+DEG_base_mean = rowMeans(RNA_seq_normalized_DEGs_matrix)
+DEG_matrix_scaled = t(apply(RNA_seq_normalized_DEGs_matrix, 1, scale))
 
-sample_names <- colnames(normalized_DEGs_matrix)
+DEG_sample_names <- colnames(RNA_seq_normalized_DEGs_matrix)
 
 # Match the sample names with their corresponding sample type from the metadata
-heatmap_annotation <- HeatmapAnnotation(Sample = sample_names,
-                                        Condition = RNA_seq_metadata$sampletype[
-                                          match(sample_names, rownames(RNA_seq_metadata))
-                                          ],
-                                        annotation_name_side = "left")
+DEG_heatmap_annotation <- HeatmapAnnotation(Sample = DEG_sample_names,
+                                            Condition = RNA_seq_metadata$sampletype[
+                                              match(DEG_sample_names, rownames(RNA_seq_metadata))
+                                              ],
+                                            annotation_name_side = "left")
 set.seed(123)
-heatmap_list <- Heatmap(matrix_scaled,
-                             column_title = "Gene_xyz_KO vs\n Wildtype significant DEGs",
-                             name = "Relative \nexpression",
-                             col = colorRamp2(c(-2, 0, 2), c("green", "black", "red")),
-                             top_annotation = heatmap_annotation,
-                             show_row_names = FALSE) +
- Heatmap(base_mean, name = "Gene counts \nbase mean", show_row_names = FALSE, show_column_names = FALSE)
+RNA_seq_DEG_heatmap_list <- Heatmap(DEG_matrix_scaled,
+                                    column_title = "Gene_xyz_KO vs\n Wildtype significant DEGs",
+                                    name = "Relative \nexpression",
+                                    col = colorRamp2(c(-2, 0, 2), c("green", "black", "red")),
+                                    top_annotation = DEG_heatmap_annotation,
+                                    show_row_names = FALSE) +
+ Heatmap(DEG_base_mean, name = "Gene counts \nbase mean", show_row_names = FALSE, show_column_names = FALSE)
 
-draw(heatmap_list)
+draw(RNA_seq_DEG_heatmap_list)
 ```

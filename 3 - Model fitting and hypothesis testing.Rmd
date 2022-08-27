@@ -44,15 +44,16 @@ plotDispEsts(RNA_seq_dds)
 Define contrasts, extract results table, and shrink the log2 fold changes, specify groups for comparison.
 From the option of edgeR CPM filtered gene counts, the DESeq2 results can have its argument for independent filtering to be toggled off by setting independentFiltering = False. Essentially this is a boolean argument of whether independent filtering should be applied automatically.
 See https://rdrr.io/bioc/DESeq2/man/results.html for a full explanation of all arguments in the DESeq2::results() function.
+DE = Differential Expression
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-RNA_seq_res_table_unshrunken <- results(RNA_seq_dds,
-                                        contrast=c("sampletype", "Treatment", "Control"),
-                                        independentFiltering = TRUE,
-                                        alpha = 0.05,
-                                        pAdjustMethod = "BH")
+RNA_seq_DE_unshrunken <- results(RNA_seq_dds,
+                                  contrast=c("sampletype", "Treatment", "Control"),
+                                  independentFiltering = TRUE,
+                                  alpha = 0.05,
+                                  pAdjustMethod = "BH")
 resultsNames(RNA_seq_dds)
-RNA_seq_res_table <- lfcShrink(RNA_seq_dds, coef="sampletype_Treatment_vs_Control", type="apeglm")
-RNA_seq_res_table
+RNA_seq_DE <- lfcShrink(RNA_seq_dds, coef="sampletype_Treatment_vs_Control", type="apeglm")
+RNA_seq_DE
 ```
 log2 fold change (MAP): sampletype Treatment vs Control 
 Wald test p-value: sampletype Treatment vs Control 
@@ -77,16 +78,16 @@ MA plot
 Specifically call the DESeq2 version of plotMA, if not it would call the plotMA from limma.
 https://rdrr.io/bioc/limma/man/plotma.html
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-DESeq2::plotMA(RNA_seq_res_table_unshrunken, ylim=c(-4, 4))
-DESeq2::plotMA(RNA_seq_res_table, ylim=c(-4, 4))
+DESeq2::plotMA(RNA_seq_DE_unshrunken, ylim=c(-4, 4))
+DESeq2::plotMA(RNA_seq_DE, ylim=c(-4, 4))
 ```
 
 
 
 Inspect DE results
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-mcols(RNA_seq_res_table, use.names=T)
-RNA_seq_res_table %>% data.frame() %>% View()
+mcols(RNA_seq_DE, use.names=T)
+RNA_seq_DE %>% data.frame() %>% View()
 ```
 
 
@@ -100,9 +101,9 @@ plotCounts(RNA_seq_dds, gene="ENSG00000132170", intgroup="sampletype")
 
 Summarize results and preview
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
-summary(RNA_seq_res_table)
-RNA_seq_res05 <- results(RNA_seq_dds, alpha=0.05)
-summary(RNA_seq_res05)
+summary(RNA_seq_DE)
+RNA_seq_DE_a05 <- results(RNA_seq_dds, alpha=0.05)
+summary(RNA_seq_DE_a05)
 ```
 out of 41142 with nonzero total read count
 adjusted p-value < 0.05
@@ -114,16 +115,16 @@ low counts [2]     : 9322, 23%
 
 
 
-Set thresholds for Fold change and adjusted p-value
+Set thresholds for Fold change and adjusted p-value for significant differentially expressed genes.
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 FC1.2 <- 0.263 # The equivalent log2FC for both
 FC1.5 <- 0.585
 FC2.0 <- 1
 padj_cutoff <- 0.05
 l2fc_cutoff <- FC2.0
-RNA_seq_res_table_tb <- RNA_seq_res_table %>% data.frame() %>% rownames_to_column(var="Ensembl ID") %>% as_tibble()
-RNA_seq_sigDEGS <- RNA_seq_res_table_tb %>% filter(padj < padj_cutoff & abs(log2FoldChange) > l2fc_cutoff)
-RNA_seq_sigDEGS
+RNA_seq_DE_table <- RNA_seq_DE %>% data.frame() %>% rownames_to_column(var="Ensembl ID") %>% as_tibble()
+RNA_seq_sig_DEGS <- RNA_seq_DE_table %>% filter(padj < padj_cutoff & abs(log2FoldChange) > l2fc_cutoff)
+RNA_seq_sig_DEGS
 ```
 # A tibble: 7,281 × 6
    `Ensembl ID`    baseMean log2FoldChange  lfcSE    pvalue      padj
@@ -148,7 +149,7 @@ Export DESeq2 results as csv file
 ##################################
 
 # For all genes:
-write.csv(as.data.frame(RNA_seq_res_table_tb), file="all_genes_Treatment_vs_Control.csv")
+write.csv(as.data.frame(RNA_seq_DE_table), file="all_genes_Treatment_vs_Control.csv")
 # For genes that pass the cut-offs above:
-write.csv(as.data.frame(RNA_seq_sigDEGS), file="FC>2_padj<05_Treatment_vs_Control.csv")
+write.csv(as.data.frame(RNA_seq_sig_DEGS), file="FC>2_padj<05_Treatment_vs_Control.csv")
 ```
