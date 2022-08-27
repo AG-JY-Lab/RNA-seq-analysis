@@ -1,0 +1,100 @@
+---
+title: "5 - Post DESeq2 filtering and result annotation"
+author: "Joshua Soon"
+date: '27 August 2022'
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+This additional step post DESeq2 differential expression is mainly to accomplish these few objectives:
+1. Filtering out genes with less than a CPM of 0.2
+2. Annotate the filtered results with HGCN gene symbols, Entrez IDs & gene descriptions
+3. Other filtering based on Log2FoldChange or Adjust p-value.
+4. Export CPM edgeR normalized counts after CPM > 0.2 filter for GSEA.
+
+
+
+Default dependencies here and yaml are required for config.yml parsing to obtain parameters.
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(yaml)
+```
+
+
+
+Load the packages for this specific Rmd notebook.
+```{r}
+library(org.Hs.eg.db)
+library(tidyverse)
+library(dplyr)
+
+columns(org.Hs.eg.db)
+
+library(edgeR)
+```
+
+```{r}
+source(here::here("src", "gsea_helpers.R"))
+```
+
+
+
+Drop those genes which fail to meet the low CPM cutoff.
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+res_table_rn_cpm_filtered <- subset(res_table_rn, !(rownames(res_table_rn) %in% names(genes_to_drop)))
+```
+
+
+
+Annotate the DESeq2 results with Gene symbols, Entrez IDs and brief gene descriptions
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+res_annotations <- AnnotationDbi::select(org.Hs.eg.db,
+                                         keys = rownames(res_table_rn_cpm_filtered),
+                                         columns = c ("SYMBOL", "ENTREZID", "GENENAME"),
+                                         keytype = "ENSEMBL") 
+
+results_annotated <- merge(res_table_rn_cpm_filtered, res_annotations, by.x=0, by.y="ENSEMBL")
+
+# Save outputs to a CSV file
+write.csv(results_annotated, "./RNA_seq_differential_expression.csv", row.names = FALSE)
+```
+
+
+
+This section might be somewhat similar to the sigDEGs portion in the 3rd Rmd, but this code block would save the significant
+differentially expressed genes along with the gene annotations.
+
+Only run the next 2 cells if the user wants to export the CSVs for the annotated significant differentially expressed genes.
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+###################################################
+### Do not commit the outputs from here to Git! ###
+###################################################
+
+padj_cutoff <- 0.05
+l2fc_cutoff <- 1
+
+# Only retain genes that are above a 0.2 CPM, below 0.05 for their adjusted p-value
+# and are differentially expressed greater than a Fold Change of 2 (L2FC = 1).
+results_annotated_sigDEGS <- results_annotated %>% dplyr::filter(padj < padj_cutoff & abs(log2FoldChange) > l2fc_cutoff)
+View(results_annotated_sigDEGS)
+
+write.csv(results_annotated_sigDEGS, "./RNA_seq_annotated_sigDEGS.csv", row.names = FALSE)
+```
+
+
+
+edge R normalization for export to GSEA
+```{r}
+# Normal edge R normalization
+limma_voom_normalized <- cpm(RNA_seq_cpm_filtered, log=F)
+# Normalization with log
+limma_voom_normalized_log <- cpm(RNA_seq_cpm_filtered, log=TRUE, prior.count=1)
+
+# Convert results to dataframe
+limma_voom_normalized_df <- data.frame(limma_voom_normalized)
+limma_voom_normalized_log_df <- data.frame(limma_voom_normalized_log)
+
+# Save as CSVs
+write.csv(limma_voom_normalized_df, "./edgeR_normalized_for_GSEA.csv", row.names = T)
+write.csv(limma_voom_normalized_log_df, "./edgeR_log_normalized_for_GSEA.csv", row.names = T)
+```
