@@ -1,0 +1,169 @@
+---
+title: "4 - Visualization of DEGs"
+author: "Joshua Soon"
+date: '26 August 2022'
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+Default dependencies here and yaml are required for config.yml parsing to obtain parameters.
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(yaml)
+```
+
+
+
+Load the packages for this specific Rmd notebook.
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(ggplot2)
+library(ggrepel)
+library(ComplexHeatmap)
+library(circlize)
+library(RColorBrewer)
+library(tidyverse)
+```
+
+
+
+DEG Bar graph
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+DEGs_up <- RNA_seq_sigDEGS %>% filter(log2FoldChange > 0)
+DEGs_down <- RNA_seq_sigDEGS %>% filter(log2FoldChange < 0)
+
+number_genes_up <- length(DEGs_up$`Ensembl ID`)
+number_genes_down <- length(DEGs_down$`Ensembl ID`)
+
+DEG_df<- data.frame(Expression = c("Up", "Down"), Genes = c(number_genes_up, number_genes_down))
+
+DEG_barplot <- ggplot(DEG_df, aes(x=Expression, y=Genes, fill=Expression)) +
+  geom_bar(stat="identity") +
+  geom_text(aes(label=Genes), nudge_y = 250, size = 8) +
+  theme_minimal() +
+  theme(axis.title.x = element_text(size=16)) +
+  theme(axis.text.x  = element_text(size=16)) +
+  theme(axis.title.y = element_text(size=16)) +
+  theme(axis.text.y  = element_text(size=16)) +
+  theme(legend.title = element_text(size=20)) +
+  theme(legend.text = element_text (size=16))
+
+DEG_barplot
+```
+
+
+
+DEG Volcano plot
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+options(ggrepel.max.overlaps = Inf)
+
+# Extract the relevant columns from the data-frame output of DESeq2 results
+res_table_rn <- RNA_seq_res_table_tb %>% column_to_rownames(var = "Ensembl ID")
+genes <- rownames(res_table_rn)
+volcano_plot_data <- data.frame(genes,
+                                log2FC = res_table_rn[,2] ,
+                                logqval = -log10(res_table_rn[,5]))
+
+# Add a column of differential expression indicators
+volcano_plot_data$diffexpressed <- "Not sig"
+
+# The equivalent log2FC for fold change values
+FC1.2 <- 0.263 
+FC1.5 <- 0.585
+FC2.0 <- 1
+
+# If log2Foldchange > 1 and padj value < 0.05, set as "UP" 
+volcano_plot_data$diffexpressed[volcano_plot_data$log2FC > FC2.0 & volcano_plot_data$logqval > 1.301] <- "UP"
+
+# If log2Foldchange < -1 and padj value < 0.05, set as "DOWN"
+volcano_plot_data$diffexpressed[volcano_plot_data$log2FC < -FC2.0 & volcano_plot_data$logqval > 1.301] <- "DOWN"
+
+# First plot base on differential expression indicators
+volcano_plot <- ggplot(volcano_plot_data, aes(x=log2FC, y=logqval, col=diffexpressed)) +
+  geom_point(size = 2) +
+  xlim(-10, 10) +
+  ylim(-1, 350)
+
+# Second plot to add black lines for FC and q-value cut-offs
+volcano_plot_2 <- volcano_plot +
+  geom_vline(xintercept=c(-1, 1), col="black") +
+  geom_hline(yintercept=1.301, col="black")
+
+# Labeling specific genes
+# Use min.segment.length = 0 to draw all line segments, no matter how short they are.
+volcano_plot_data$genelabels <- ""
+volcano_plot_data$genelabels <- ifelse(volcano_plot_data$genes == "ENSG00000117215", TRUE, FALSE)
+volcano_plot_3 <- volcano_plot_2 + geom_text_repel(min.segment.length = 0,
+                                                   label = ifelse(volcano_plot_data$genelabels,
+                                                                  volcano_plot_data$genes, ""),
+                                                   colour = 'black')
+
+# Create custom colour panel
+vp_colors <- c("blue", "red", "grey")
+names(vp_colors) <- c("DOWN", "UP", "Not sig")
+
+# Add custom colour panel and axis limits
+# vp2 is without individual gene geom_text_repel label and vp3 is with individual gene geom_text_repel label
+# Use min.segment.length = 0 to draw all line segments, no matter how short they are
+volcano_plot_4 <- volcano_plot_3 + scale_colour_manual(values = vp_colors)
+
+# Add appropriate title and axis labels
+volcano_plot_5 <- volcano_plot_4 + 
+  ggtitle("Gene_xyz_KO vs\n Wildtype DEGs") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(y="-Log10(q-value)", x = "Log2(Fold-change)") +
+  labs(col="Differential\nexpression\nstatus")
+
+volcano_plot_6 <- volcano_plot_5 + theme(plot.title = element_text(size=20)) +
+  theme(axis.title.x = element_text(size=16)) +
+  theme(axis.text.x  = element_text(size=10)) +
+  theme(axis.title.y = element_text(size=16)) +
+  theme(axis.text.y  = element_text(size=10)) +
+  theme(legend.title = element_text(size=16)) +
+  theme(legend.text = element_text (size=16))
+
+volcano_plot_6
+```
+
+
+
+Heatmap of DEGs
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# Create tibbles including row names
+# Normalized_counts are from first Rmd.
+RNA_seq_normalized_counts_df <- RNA_seq_normalized_counts %>% 
+  data.frame() %>%
+  rownames_to_column(var="Ensembl ID") %>% 
+  as_tibble()
+
+# Extract normalized expression for significant genes from the, and set the gene column (1) to row names
+normalized_DEGs_df <- RNA_seq_normalized_counts_df[,c(1:9)] %>% 
+  filter(`Ensembl ID` %in% RNA_seq_sigDEGS$`Ensembl ID`) %>% 
+  data.frame() %>%
+  column_to_rownames(var = "Ensembl.ID")
+
+# Run ComplexHeatmap
+normalized_DEGs_matrix <- as.matrix(normalized_DEGs_df[, grep("_", colnames(normalized_DEGs_df))])
+base_mean = rowMeans(normalized_DEGs_matrix)
+matrix_scaled = t(apply(normalized_DEGs_matrix, 1, scale))
+
+sample_names <- colnames(normalized_DEGs_matrix)
+
+# Match the sample names with their corresponding sample type from the metadata
+heatmap_annotation <- HeatmapAnnotation(Sample = sample_names,
+                                        Condition = RNA_seq_metadata$sampletype[
+                                          match(sample_names, rownames(RNA_seq_metadata))
+                                          ],
+                                        annotation_name_side = "left")
+set.seed(123)
+heatmap_list <- Heatmap(matrix_scaled,
+                             column_title = "Gene_xyz_KO vs\n Wildtype significant DEGs",
+                             name = "Relative \nexpression",
+                             col = colorRamp2(c(-2, 0, 2), c("green", "black", "red")),
+                             top_annotation = heatmap_annotation,
+                             show_row_names = FALSE) +
+ Heatmap(base_mean, name = "Gene counts \nbase mean", show_row_names = FALSE, show_column_names = FALSE)
+
+draw(heatmap_list)
+```

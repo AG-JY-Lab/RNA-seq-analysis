@@ -1,0 +1,37 @@
+---
+title: "0 - Merging STAR quantmode read counts"
+author: "Joshua Soon"
+date: '25 August 2022'
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+Default dependencies here and yaml are required for config.yml parsing to obtain parameters.
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(here)
+library(yaml)
+```
+
+
+
+Load the packages for this specific Rmd notebook.
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(plyr)
+
+config <- yaml.load_file("config.yml")
+
+source(here::here("src", "RNA_seq_helper_functions.R"))
+```
+
+
+
+Read the count data files and merge them into a single dataframe
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+RNA_seq_samples <- config$Samples$Treatment_vs_control
+RNA_seq_data_path <- config$Paths$Treatment_vs_control_data
+RNA_seq_counts_df <- STARo2df(RNA_seq_samples, RNA_seq_data_path)
+```
+
+

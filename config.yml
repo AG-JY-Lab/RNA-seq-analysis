@@ -1,0 +1,14 @@
+Paths:
+  Treatment_vs_control_meta: "./data/treatment_vs_control.meta"
+  Treatment_vs_control_data: "./data"
+
+Samples:
+  Treatment_vs_control:
+    Wildtype_1: "Wildtype_1"
+    Wildtype_2: "Wildtype_2"
+    Wildtype_3: "Wildtype_3"
+    Wildtype_4: "Wildtype_4"
+    Gene_xyz_KO_1: "Gene_xyz_KO_1"
+    Gene_xyz_KO_2: "Gene_xyz_KO_2"
+    Gene_xyz_KO_3: "Gene_xyz_KO_3"
+    Gene_xyz_KO_4: "Gene_xyz_KO_4"

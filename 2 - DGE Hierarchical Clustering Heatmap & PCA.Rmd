@@ -1,0 +1,70 @@
+---
+title: "2 - DGE Hierarchical Clustering Heatmap & PCA"
+author: "Joshua Soon"
+date: '25 August 2022'
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+Default dependencies here and yaml are required for config.yml parsing to obtain parameters.
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(yaml)
+```
+
+
+
+Load the packages for this specific Rmd notebook.
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(ggplot2)
+library(pheatmap)
+library(ggrepel)
+library(RColorBrewer)
+```
+
+
+
+Transform counts for data visualization
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+RNA_seq_rld <- rlog(RNA_seq_dds, blind=TRUE)
+```
+
+
+
+Plot PCA
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+plotPCA(RNA_seq_rld, intgroup="sampletype") + 
+  labs(colour="Experimental\nCondition") +
+  geom_text_repel(aes(label = name), size = 5, point.padding = 5) + # geom_text_repel: Repulsive textual annotations.
+  geom_point(size = 3) +
+  coord_fixed(xlim = c(-30, 30), ylim = c(-30, 30), ratio = 1/1) + # Ratio is x / y
+  theme(axis.title.x = element_text(size=16)) +
+  theme(axis.text.x  = element_text(size=10)) +
+  theme(axis.title.y = element_text(size=16)) +
+  theme(axis.text.y  = element_text(size=10)) +
+  theme(legend.title = element_text(size=20)) +
+  theme(legend.text = element_text (size=16))
+```
+
+
+
+Hierarchical Clustering Heat-map from correlation values
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# Hierarchical clustering
+RNA_seq_rld_matrix <- assay(RNA_seq_rld)
+
+# Compute pairwise correlation values
+RNA_seq_correlation <- cor(RNA_seq_rld_matrix)    # cor() is a base R function
+
+head(RNA_seq_correlation) # check the output of cor(), make note of the rownames and colnames
+
+# Select colour palette
+heat.colors <- brewer.pal(11, "RdYlBu")
+
+# Plot correlation heat-map
+pheatmap(RNA_seq_correlation, color = rev(heat.colors), border_color = NA, fontsize = 12, 
+         fontsize_row = 12, height = 20, main = "RNA-seq sample pairwise correlation")
+# add legend_breaks = c(x ,y, z, ...) for custom legend values
+```
