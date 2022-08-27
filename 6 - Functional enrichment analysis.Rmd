@@ -40,8 +40,7 @@ For this analysis, we will proceed with the genes with post DESeq2 CPM filtering
 
 For various cutoffs on Log2FoldChange and adjusted p-value, the changes can be made in 5 - Post DESeq2 filtering and result annotation.
 
-Within the results, the gene symbols and Entrez IDs for enrichKEGG would be found in the SYMBOL & ENTREZID columns respectively.
-Get Ensembl ID character vector for genes that have a adjusted p-value < 0.05 and a Fold change > 4.
+Within the results, the HGNC gene symbols and Entrez IDs for enrichKEGG would be found in the SYMBOL & ENTREZID columns respectively.
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 FE_genes_cpm_filtered <- RNA_seq_DE_annotated_sigDEGS_cpm_filtered
 

@@ -73,7 +73,7 @@ write.csv(RNA_seq_DE_annotated, "./RNA_seq_differential_expression.csv", row.nam
 This section might be somewhat similar to the sigDEGs portion in the 3rd Rmd, but this code block would save the significant
 differentially expressed genes along with the gene annotations.
 
-Only run the next 2 cells if the user wants to export the CSVs for the annotated significant differentially expressed genes.
+Only run the write.csv() functions to export the CSVs for the annotated significant differentially expressed genes.
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 ###################################################
 ### Do not commit the outputs from here to Git! ###
