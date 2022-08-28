@@ -8,17 +8,10 @@ editor_options:
 ---
 
 This additional step post DESeq2 differential expression is mainly to accomplish these few objectives:
-1. Filtering out genes with less than a CPM of 0.2
+1. Filter out genes with less than a CPM of 0.2 and persist that data for downstream usage.
 2. Annotate the filtered results with HGCN gene symbols, Entrez IDs & gene descriptions
 3. Other filtering based on Log2FoldChange or Adjust p-value.
 4. Export CPM edgeR normalized counts after CPM > 0.2 filter for GSEA.
-
-
-
-Default dependencies here and yaml are required for config.yml parsing to obtain parameters.
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-library(yaml)
-```
 
 
 

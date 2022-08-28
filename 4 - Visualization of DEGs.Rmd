@@ -9,13 +9,6 @@ editor_options:
 
 
 
-Default dependencies here and yaml are required for config.yml parsing to obtain parameters.
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-library(yaml)
-```
-
-
-
 Load the packages for this specific Rmd notebook.
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 library(ggplot2)

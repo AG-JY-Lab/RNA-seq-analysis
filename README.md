@@ -183,15 +183,61 @@ Samples:
 
 <br>
 
-### 5. Post DESeq2 filtering and thresholding
+### 5. Post DESeq2 filtering and result annotation
 
-- Some explanation
+This additional step post DESeq2 differential expression is mainly to accomplish these few objectives:
+1. Filter out genes with less than a CPM of 0.2 and persist that data for downstream usage.
+2. Annotate the filtered results with HGCN gene symbols, Entrez IDs & gene descriptions, and export as a csv.
+3. Other filtering based on Log2FoldChange or Adjust p-value.
+4. Export CPM edgeR normalized counts after CPM > 0.2 filter for [GSEA](https://www.gsea-msigdb.org/gsea/index.jsp).
+
+    ### Dependencies:
+
+    - [org.Hs.eg.db](https://bioconductor.org/packages/release/data/annotation/html/org.Hs.eg.db.html)
+
+    - [edgeR](https://bioconductor.org/packages/release/bioc/html/edgeR.html)
+
+    - [dplyr](https://dplyr.tidyverse.org/)
+
+    - [tidyverse](https://www.tidyverse.org/)
 
 <br>
 
 ### 6. Functional enrichment analysis
 
-- Some explanation
+The CPM filtered significant differentially expressed genes (sig_DEGs) will be piped into [ClusterProfiler](https://guangchuangyu.github.io/software/clusterProfiler/), a tool for performing functional enrichment analysis. ClusterProfiler houses a collection of tools and methods to perform a wholistic semantic analysis (drawing meaning from the data) of omics data by looking at global (and local) changes in the data and making relevant comparisons with publicly available curated omics and gene ontology databases.
+
+A detailed walk-through of the major functionality of ClusterProfiler can be found [here](https://yulab-smu.top/biomedical-knowledge-mining-book/) as well as the code using the tools within ClusterProfiler as separate Rmd files [here](https://github.com/YuLab-SMU/biomedical-knowledge-mining-book).
+
+For this workflow, we only use a number of the tools within ClusterProfiler that might be more commonly used in a typical RNA-seq analysis:
+
+- To-add-later
+
+- To-add-later
+
+- To-add-later
+
+    ### Dependencies:
+
+    - [tidyverse](https://www.tidyverse.org/)
+
+    - [clusterProfiler](https://bioconductor.org/packages/release/bioc/html/clusterProfiler.html)
+
+    - [org.Hs.eg.db](https://bioconductor.org/packages/release/data/annotation/html/org.Hs.eg.db.html)
+
+    - [DOSE](https://www.bioconductor.org/packages/release/bioc/html/DOSE.html)
+
+    - [ReactomePA](https://bioconductor.org/packages/release/bioc/html/ReactomePA.html)
+
+    - [enrichplot](https://bioconductor.org/packages/release/bioc/html/enrichplot.html)
+
+    - [ggnewscale](https://cran.r-project.org/web/packages/ggnewscale/)
+
+    - [ggplot2](https://ggplot2.tidyverse.org/)
+
+    - [org.Hs.eg.db](https://bioconductor.org/packages/release/data/annotation/html/org.Hs.eg.db.html)
+
+    - [msigdbr](https://cran.r-project.org/web/packages/msigdbr/)
 
 <br>
 
@@ -215,7 +261,7 @@ Common issues can be tracked here along with their respective fixes:
 ## TODOs:
 
 - [x] Proper README and first PR.
-- [ ] In depth explanation of each step of the analysis.
-- [ ] Implement full functional enrichment analysis.
+- [x] In depth explanation of each step of the analysis.
+- [x] Implement full functional enrichment analysis.
 - [ ] Implement some version of Pathway Topology analysis (either NetGSA or SPIA or others if found).
 - [ ] Comparative analysis with other pan cancer omics databases (e.g. TCGA).
