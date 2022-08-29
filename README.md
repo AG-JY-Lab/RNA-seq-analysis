@@ -211,11 +211,23 @@ A detailed walk-through of the major functionality of ClusterProfiler can be fou
 
 For this workflow, we only use a number of the tools within ClusterProfiler that might be more commonly used in a typical RNA-seq analysis:
 
-- To-add-later
+- `enrichGO()` function with:
+  - Biological Processes (BP)
+  - Molecular Function (MF)
+  - Cellular Component (CC)
 
-- To-add-later
+- Bar plots & dot plots of enrichment results for gene ontology over representation analysis (ORA).
 
-- To-add-later
+- A number of disease-gene enrichment:
+  - `enrichDGN()` Disease Gene Network
+  - `enrichNCG()` Network of Cancer Genes
+  - `enrichDO()` Disease Ontology
+
+- Reactome pathway `enrichPathway()` and KEGG pathway `enrichKEGG()` over-representation analysis.
+
+- Enrichment maps for gene sets from GO-BP, GO-MF & GO-CC.
+
+- [More](https://yulab-smu.top/biomedical-knowledge-mining-book/enrichplot.html) to come soon . . .
 
     ### Dependencies:
 
