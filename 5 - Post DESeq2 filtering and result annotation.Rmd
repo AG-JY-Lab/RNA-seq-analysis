@@ -29,7 +29,7 @@ source(here::here("src", "gsea_helpers.R"))
 
 
 
-Drop those genes which fail to meet the low CPM cutoff.
+Drop those genes which fail to meet the low CPM cutoff (for post DESeq2 low cpm filtering - optional).
 RNA-seq differential expression results (DE) with and without low CPM filtering.
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 RNA_seq_DE_cpm_filtered <- subset(RNA_seq_DE_table_rn, !(rownames(RNA_seq_DE_table_rn) %in% names(genes_to_drop)))
@@ -75,11 +75,12 @@ Only run the write.csv() functions to export the CSVs for the annotated signific
 padj_cutoff <- 0.05
 l2fc_cutoff <- 1
 
-# Only retain genes that are above a 0.2 CPM, below 0.05 for their adjusted p-value
+# Only retain genes that are below 0.05 for their adjusted p-value, and greater than a Log2 fold-change of 1.
 # and are differentially expressed greater than a Fold Change of 2 (L2FC = 1).
 RNA_seq_DE_annotated_sigDEGS <- RNA_seq_DE_annotated %>% dplyr::filter(padj < padj_cutoff & abs(log2FoldChange) > l2fc_cutoff)
 View(RNA_seq_DE_annotated_sigDEGS)
 
+# Only retain genes that are above a 0.2 CPM, below 0.05 for their adjusted p-value, and greater than a Log2 fold-change of 1.
 RNA_seq_DE_annotated_sigDEGS_cpm_filtered <- RNA_seq_DE_cpm_filtered_annotated %>% dplyr::filter(
   padj < padj_cutoff 
   & abs(log2FoldChange) > l2fc_cutoff
@@ -92,10 +93,17 @@ write.csv(RNA_seq_DE_annotated_sigDEGS, "./RNA_seq_annotated_sigDEGS.csv", row.n
 
 
 edge R normalization for export to GSEA
+Note: Only run one of the lines for either non-cpm filtered counts or cpm filtered counts.
+Note: Running both will override the limma_voom counts variable to the latest one, which is `RNA_seq_cpm_filtered`.
 ```{r}
-# Normal edge R normalization
+# edge R normalization for non-cpm filtered counts.
+limma_voom_normalized <- cpm(RNA_seq_counts_final, log=F)
+# edge R normalization for cpm filtered counts.
 limma_voom_normalized <- cpm(RNA_seq_cpm_filtered, log=F)
-# Normalization with log
+
+# edge R normalization with log for non-cpm filtered counts.
+limma_voom_normalized_log <- cpm(RNA_seq_counts_final, log=TRUE, prior.count=1)
+# edge R normalization with log for cpm filtered counts.
 limma_voom_normalized_log <- cpm(RNA_seq_cpm_filtered, log=TRUE, prior.count=1)
 
 # Convert results to dataframe

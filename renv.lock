@@ -595,6 +595,17 @@
       "Hash": "50c838a310445e954bc13f26f26a6ecf",
       "Requirements": []
     },
+    "babelgene": {
+      "Package": "babelgene",
+      "Version": "22.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "17e8c9ad2b88073ef7ced9654ac3f7ef",
+      "Requirements": [
+        "dplyr",
+        "rlang"
+      ]
+    },
     "backports": {
       "Package": "backports",
       "Version": "1.4.1",
@@ -782,10 +793,10 @@
     },
     "cluster": {
       "Package": "cluster",
-      "Version": "2.1.3",
+      "Version": "2.1.4",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "c5f8447373ec2a0f593c694024e5b7ee",
+      "Hash": "5edbbabab6ce0bf7900a74fd4358628e",
       "Requirements": []
     },
     "clusterProfiler": {
@@ -1019,13 +1030,12 @@
       "Package": "enrichplot",
       "Version": "1.16.1",
       "Source": "Bioconductor",
-      "RemoteType": "bioconductor",
       "Remotes": "YuLab-SMU/tidydr",
       "git_url": "https://git.bioconductor.org/packages/enrichplot",
       "git_branch": "RELEASE_3_15",
       "git_last_commit": "cff77b6",
       "git_last_commit_date": "2022-05-04",
-      "Hash": "9584113050add1bf63522e9638d95ce4",
+      "Hash": "784df85d54c1b0ae4c0fbcaaab3ac112",
       "Requirements": [
         "DOSE",
         "GOSemSim",
@@ -1260,6 +1270,16 @@
         "rlang"
       ]
     },
+    "ggnewscale": {
+      "Package": "ggnewscale",
+      "Version": "0.4.7",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "df57a381783476d083e9f7350d382c3d",
+      "Requirements": [
+        "ggplot2"
+      ]
+    },
     "ggplot2": {
       "Package": "ggplot2",
       "Version": "3.3.6",
@@ -1332,13 +1352,12 @@
       "Package": "ggtree",
       "Version": "3.4.2",
       "Source": "Bioconductor",
-      "RemoteType": "bioconductor",
       "Remotes": "GuangchuangYu/treeio",
       "git_url": "https://git.bioconductor.org/packages/ggtree",
       "git_branch": "RELEASE_3_15",
       "git_last_commit": "d51af68",
       "git_last_commit_date": "2022-08-13",
-      "Hash": "163d386b8c62af883966c0a5c08cab81",
+      "Hash": "d7ebbe40db8e6eedd0a601943031cfb1",
       "Requirements": [
         "ape",
         "aplot",
@@ -1790,6 +1809,21 @@
         "tidyr",
         "tidyselect",
         "vctrs"
+      ]
+    },
+    "msigdbr": {
+      "Package": "msigdbr",
+      "Version": "7.5.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "2def1d52dfe1044f82e75d25fb5dd2e5",
+      "Requirements": [
+        "babelgene",
+        "dplyr",
+        "magrittr",
+        "rlang",
+        "tibble",
+        "tidyselect"
       ]
     },
     "munsell": {
