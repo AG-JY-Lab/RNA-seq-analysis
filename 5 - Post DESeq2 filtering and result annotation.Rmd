@@ -1,0 +1,116 @@
+---
+title: "5 - Post DESeq2 filtering and result annotation"
+author: "Joshua Soon"
+date: '28 August 2022'
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+This additional step post DESeq2 differential expression is mainly to accomplish these few objectives:
+1. Filter out genes with less than a CPM of 0.2 and persist that data for downstream usage.
+2. Annotate the filtered results with HGCN gene symbols, Entrez IDs & gene descriptions
+3. Other filtering based on Log2FoldChange or Adjust p-value.
+4. Export CPM edgeR normalized counts after CPM > 0.2 filter for GSEA.
+
+
+
+Load the packages for this specific Rmd notebook.
+```{r}
+library(org.Hs.eg.db)
+library(tidyverse)
+library(dplyr)
+library(edgeR)
+```
+
+```{r}
+source(here::here("src", "gsea_helpers.R"))
+```
+
+
+
+Drop those genes which fail to meet the low CPM cutoff (for post DESeq2 low cpm filtering - optional).
+RNA-seq differential expression results (DE) with and without low CPM filtering.
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+RNA_seq_DE_cpm_filtered <- subset(RNA_seq_DE_table_rn, !(rownames(RNA_seq_DE_table_rn) %in% names(genes_to_drop)))
+```
+
+
+
+Annotate the DESeq2 results with Gene symbols, Entrez IDs and brief gene descriptions
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# For CPM filtered DE results:
+res_annotations <- AnnotationDbi::select(org.Hs.eg.db,
+                                         keys = rownames(RNA_seq_DE_cpm_filtered),
+                                         columns = c ("SYMBOL", "ENTREZID", "GENENAME"),
+                                         keytype = "ENSEMBL") 
+
+RNA_seq_DE_cpm_filtered_annotated <- merge(RNA_seq_DE_cpm_filtered, res_annotations, by.x=0, by.y="ENSEMBL")
+
+# Save outputs to a CSV file
+write.csv(RNA_seq_DE_cpm_filtered_annotated, "./RNA_seq_differential_expression_cpm_filtered.csv", row.names = FALSE)
+
+# For non filtered DE results:
+all_res_annotations <- AnnotationDbi::select(org.Hs.eg.db,
+                                             keys = rownames(RNA_seq_DE_table_rn),
+                                             columns = c ("SYMBOL", "ENTREZID", "GENENAME"),
+                                             keytype = "ENSEMBL") 
+
+RNA_seq_DE_annotated <- merge(RNA_seq_DE_table_rn, all_res_annotations, by.x=0, by.y="ENSEMBL")
+
+write.csv(RNA_seq_DE_annotated, "./RNA_seq_differential_expression.csv", row.names = FALSE)
+```
+
+
+
+This section might be somewhat similar to the sigDEGs portion in the 3rd Rmd, but this code block would save the significant
+differentially expressed genes along with the gene annotations.
+
+Only run the write.csv() functions to export the CSVs for the annotated significant differentially expressed genes.
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+###################################################
+### Do not commit the outputs from here to Git! ###
+###################################################
+
+padj_cutoff <- 0.05
+l2fc_cutoff <- 1
+
+# Only retain genes that are below 0.05 for their adjusted p-value, and greater than a Log2 fold-change of 1.
+# and are differentially expressed greater than a Fold Change of 2 (L2FC = 1).
+RNA_seq_DE_annotated_sigDEGS <- RNA_seq_DE_annotated %>% dplyr::filter(padj < padj_cutoff & abs(log2FoldChange) > l2fc_cutoff)
+View(RNA_seq_DE_annotated_sigDEGS)
+
+# Only retain genes that are above a 0.2 CPM, below 0.05 for their adjusted p-value, and greater than a Log2 fold-change of 1.
+RNA_seq_DE_annotated_sigDEGS_cpm_filtered <- RNA_seq_DE_cpm_filtered_annotated %>% dplyr::filter(
+  padj < padj_cutoff 
+  & abs(log2FoldChange) > l2fc_cutoff
+  )
+View(RNA_seq_DE_annotated_sigDEGS_cpm_filtered)
+
+write.csv(RNA_seq_DE_annotated_sigDEGS, "./RNA_seq_annotated_sigDEGS.csv", row.names = FALSE)
+```
+
+
+
+edge R normalization for export to GSEA
+Note: Only run one of the lines for either non-cpm filtered counts or cpm filtered counts.
+Note: Running both will override the limma_voom counts variable to the latest one, which is `RNA_seq_cpm_filtered`.
+```{r}
+# edge R normalization for non-cpm filtered counts.
+limma_voom_normalized <- cpm(RNA_seq_counts_final, log=F)
+# edge R normalization for cpm filtered counts.
+limma_voom_normalized <- cpm(RNA_seq_cpm_filtered, log=F)
+
+# edge R normalization with log for non-cpm filtered counts.
+limma_voom_normalized_log <- cpm(RNA_seq_counts_final, log=TRUE, prior.count=1)
+# edge R normalization with log for cpm filtered counts.
+limma_voom_normalized_log <- cpm(RNA_seq_cpm_filtered, log=TRUE, prior.count=1)
+
+# Convert results to dataframe
+limma_voom_normalized_df <- data.frame(limma_voom_normalized)
+limma_voom_normalized_log_df <- data.frame(limma_voom_normalized_log)
+
+# Save as CSVs
+write.csv(limma_voom_normalized_df, "./edgeR_normalized_for_GSEA.csv", row.names = T)
+write.csv(limma_voom_normalized_log_df, "./edgeR_log_normalized_for_GSEA.csv", row.names = T)
+```

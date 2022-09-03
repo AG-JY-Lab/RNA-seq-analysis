@@ -42,7 +42,6 @@ The metadata file is needed for DESeq2's grouping.
 # Read only if counts have been saved to CSV
 RNA_seq_data <- read.csv(data_file)
 
-# For Rh30
 # If there are duplicate gene names, take the sum of all read-counts.
 # TODO this can be improved upon.
 RNA_seq_counts_consolidated <- {RNA_seq_counts_df %>% group_by(Ensembl) %>% summarise_all(sum)}

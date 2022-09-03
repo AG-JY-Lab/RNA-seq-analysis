@@ -1,0 +1,215 @@
+---
+title: "6 - Functional enrichment analysis (cluster profiler)"
+author: "Joshua Soon"
+date: '28 August 2022'
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+Load the packages for this specific Rmd notebook.
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(clusterProfiler)
+library(DOSE)
+library(ReactomePA)
+library(enrichplot)
+library(ggnewscale)
+library(ggplot2)
+library(org.Hs.eg.db)
+library(msigdbr)
+```
+
+
+
+The genes extracted for Functional Enrichment will be named as `FE_genes_` and suffixed with other relevant identifiers, like with and without CPM filtering.
+For functional enrichment, we are most interested in the significant differently expressed genes:
+1. RNA_seq_DE_annotated_sigDEGS (without low CPM filtering)
+2. RNA_seq_DE_annotated_sigDEGS_cpm_filtered (with low CPM filtering)
+For this analysis, we will proceed with the genes with post DESeq2 CPM filtering but the other option is possible too.
+
+For various cutoffs on Log2FoldChange and adjusted p-value, the changes can be made in 5 - Post DESeq2 filtering and result annotation.
+
+Within the results, the HGNC gene symbols and Entrez IDs for enrichKEGG would be found in the SYMBOL & ENTREZID columns respectively.
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+FE_genes_cpm_filtered <- RNA_seq_DE_annotated_sigDEGS_cpm_filtered
+
+# The Row.names column contain the Ensembl IDs
+FE_genes_ensembl_all <- FE_genes_cpm_filtered$Row.names
+length(FE_genes_ensembl_all)
+# Get unique ones
+FE_genes_ensembl_unique <- unique(FE_genes_ensembl_all)
+
+# The ENTREZID column will contain the Entrez IDs
+FE_genes_entrez_all <- FE_genes_cpm_filtered$ENTREZID
+sum(is.na(FE_genes_entrez_all))
+
+# Remove NAs for those which cannot map to an Entrez IDs
+entrez_no_na <- na.omit(FE_genes_entrez_all)
+length(entrez_no_na)
+
+# Get unique ones
+FE_genes_entrez_unique <- unique(entrez_no_na)
+length(FE_genes_entrez_unique)
+```
+
+
+
+Gene Ontology (GO) over representation analysis (ORA)
+1. Biological Processes (BP)
+2. Molecular Function (MF)
+3. Cellular Component (CC)
+
+GO BP
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+GO_BP <- enrichGO(gene = FE_genes_ensembl_unique,
+                  OrgDb = org.Hs.eg.db,
+                  keyType = "ENSEMBL",
+                  ont = "BP",
+                  pAdjustMethod = "BH",
+                  qvalueCutoff = 0.05,
+                  readable = TRUE)
+
+GO_BP_bar_plot <- barplot(GO_BP, showCategory=10, font.size = 16) +
+  xlab("Number of genes") +
+  ggtitle("Barplot for EnrichGO:BP")
+
+GO_BP_bar_plot
+
+GO_BP_dot_plot <- dotplot(GO_BP, showCategory=10, font.size = 16) +
+  ggtitle("Dotplot for EnrichGO:BP")
+
+GO_BP_dot_plot
+```
+
+GO MF
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+GO_MF <- enrichGO(gene = FE_genes_ensembl_unique,
+                  OrgDb = org.Hs.eg.db,
+                  keyType = "ENSEMBL",
+                  ont = "MF",
+                  pAdjustMethod = "BH",
+                  qvalueCutoff = 0.05,
+                  readable = TRUE)
+
+GO_MF_bar_plot <- barplot(GO_MF, showCategory=10, font.size = 16) +
+  xlab("Number of genes") +
+  ggtitle("Barplot for EnrichGO:MF")
+
+GO_MF_bar_plot
+
+GO_MF_dot_plot <- dotplot(GO_MF, showCategory=10, font.size = 16) +
+  ggtitle("Dotplot for EnrichGO:MF")
+
+GO_MF_dot_plot
+```
+
+GO CC
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+GO_CC <- enrichGO(gene = FE_genes_ensembl_unique,
+                  OrgDb = org.Hs.eg.db,
+                  keyType = "ENSEMBL",
+                  ont = "CC",
+                  pAdjustMethod = "BH",
+                  qvalueCutoff = 0.05,
+                  readable = TRUE)
+
+GO_CC_bar_plot <- barplot(GO_CC, showCategory=10, font.size = 16) +
+  xlab("Number of genes") +
+  ggtitle("Barplot for EnrichGO:CC")
+
+GO_CC_bar_plot
+
+GO_CC_dot_plot <- dotplot(GO_CC, showCategory=10, font.size = 16) +
+  ggtitle("Dotplot for EnrichGO:CC")
+
+GO_CC_dot_plot
+```
+
+
+
+Over-representation analysis for disease-gene associations.
+For this, Entrez IDs are needed so `FE_genes_entrez_unique` is used.
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+DGN <- enrichDGN(gene = FE_genes_entrez_unique, pAdjustMethod = "BH", qvalueCutoff = 0.05, readable = TRUE)
+
+DGN_dot_plot <- dotplot(DGN, showCategory=10, font.size = 16) + ggtitle("Dotplot for EnrichDGN")
+
+DGN_dot_plot
+```
+
+
+
+Over-representation analysis for the Network of Cancer Genes (NCG).
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+NCG <- enrichNCG(gene = FE_genes_entrez_unique, pAdjustMethod = "BH", qvalueCutoff = 0.05, readable = TRUE)
+
+NCG_dot_plot <- dotplot(NCG, showCategory=10, font.size = 16) + ggtitle("Dotplot for EnrichNCG")
+
+NCG_dot_plot
+```
+
+
+
+Disease ontology over-representation analysis.
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+DO <- enrichDO(gene = FE_genes_entrez_unique, pAdjustMethod = "BH", qvalueCutoff = 0.05, readable = TRUE)
+
+DO_dot_plot <- dotplot(DO, showCategory=10) + ggtitle("Dotplot for EnrichDO")
+
+DO_dot_plot
+```
+
+
+
+Reactome pathway over-representation analysis.
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+Reactome_PA <- enrichPathway(gene = FE_genes_entrez_unique, pAdjustMethod = "BH", qvalueCutoff = 0.05, readable=TRUE)
+
+Reactome_PA_dot_plot <- dotplot(Reactome_PA, showCategory=10) + ggtitle("Dotplot for Reactome pathway")
+
+Reactome_PA_dot_plot
+```
+
+
+
+KEGG pathway over-representation analysis.
+```{r}
+KEGG <- enrichKEGG(gene = FE_genes_entrez_unique, pAdjustMethod = "BH", qvalueCutoff = 0.05)
+
+KEGG_dot_plot <- dotplot(KEGG, showCategory=10) + ggtitle("Dotplot for EnrichKEGG")
+
+KEGG_dot_plot
+```
+
+
+
+Enrichment maps
+GO BP enrichment map
+```{r}
+GO_BP_pairwise <- pairwise_termsim(GO_BP)
+
+GO_BP_enrichment_map <- emapplot(GO_BP_pairwise, showCategory = 30, min_edge = 0.2, cex_label_category = 1)
+
+GO_BP_enrichment_map
+```
+
+GO MF enrichment map
+```{r}
+GO_MF_pairwise <- pairwise_termsim(GO_MF)
+
+GO_MF_enrichment_map <- emapplot(GO_MF_pairwise, showCategory = 30, min_edge = 0.2, cex_label_category = 1)
+
+GO_MF_enrichment_map
+```
+
+GO CC enrichment map
+```{r}
+GO_CC_pairwise <- pairwise_termsim(GO_CC)
+
+GO_CC_enrichment_map <- emapplot(GO_CC_pairwise, showCategory = 30, min_edge = 0.2, cex_label_category = 1)
+
+GO_CC_enrichment_map
+```
