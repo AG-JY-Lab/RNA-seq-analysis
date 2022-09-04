@@ -63,7 +63,7 @@ In the event which the user wishes to perform functional enrichment on up- and d
 The unique Ensembl and Entrez IDs can be retrieve from the up_reg and down_reg dataframes individually and be piped into the downstream functional enrichment steps.
 `FE_genes_up_reg_ensembl_unique` and `FE_genes_up_reg_entrez_unique` would have the Ensembl and Entrez IDs for up-regulated genes respectively.
 `FE_genes_down_reg_ensembl_unique` and `FE_genes_down_reg_entrez_unique` would have the Ensembl and Entrez IDs for down-regulated genes respectively.
-```{r}
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 FE_genes_up_reg_cpm_filtered <- RNA_seq_DE_cpm_filtered_annotated %>% dplyr::filter(
   padj < padj_cutoff 
   & log2FoldChange > 1
