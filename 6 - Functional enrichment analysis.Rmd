@@ -57,6 +57,62 @@ length(FE_genes_entrez_unique)
 
 
 
+## Optional
+Performing functional enrichment on up- and down-regulated genes separately.
+In the event which the user wishes to perform functional enrichment on up- and down-regulated genes separately, this cell outputs the necessary variables for that.
+The unique Ensembl and Entrez IDs can be retrieve from the up_reg and down_reg dataframes individually and be piped into the downstream functional enrichment steps.
+`FE_genes_up_reg_ensembl_unique` and `FE_genes_up_reg_entrez_unique` would have the Ensembl and Entrez IDs for up-regulated genes respectively.
+`FE_genes_down_reg_ensembl_unique` and `FE_genes_down_reg_entrez_unique` would have the Ensembl and Entrez IDs for down-regulated genes respectively.
+```{r}
+FE_genes_up_reg_cpm_filtered <- RNA_seq_DE_cpm_filtered_annotated %>% dplyr::filter(
+  padj < padj_cutoff 
+  & log2FoldChange > 1
+  )
+
+# The Row.names column contain the Ensembl IDs
+FE_genes_up_reg_ensembl_all <- FE_genes_up_reg_cpm_filtered$Row.names
+length(FE_genes_up_reg_ensembl_all)
+# Get unique ones
+FE_genes_up_reg_ensembl_unique <- unique(FE_genes_up_reg_ensembl_all)
+
+# The ENTREZID column will contain the Entrez IDs
+FE_genes_up_reg_entrez_all <- FE_genes_up_reg_cpm_filtered$ENTREZID
+sum(is.na(FE_genes_up_reg_entrez_all))
+
+# Remove NAs for those which cannot map to an Entrez IDs
+entrez_no_na <- na.omit(FE_genes_up_reg_entrez_all)
+length(entrez_no_na)
+
+# Get unique ones
+FE_genes_up_reg_entrez_unique <- unique(entrez_no_na)
+length(FE_genes_up_reg_entrez_unique)
+
+FE_genes_down_reg_cpm_filtered <- RNA_seq_DE_cpm_filtered_annotated %>% dplyr::filter(
+  padj < padj_cutoff 
+  & log2FoldChange < -1
+  )
+
+# The Row.names column contain the Ensembl IDs
+FE_genes_down_reg_ensembl_all <- FE_genes_down_reg_cpm_filtered$Row.names
+length(FE_genes_down_reg_ensembl_all)
+# Get unique ones
+FE_genes_down_reg_ensembl_unique <- unique(FE_genes_down_reg_ensembl_all)
+
+# The ENTREZID column will contain the Entrez IDs
+FE_genes_down_reg_entrez_all <- FE_genes_down_reg_cpm_filtered$ENTREZID
+sum(is.na(FE_genes_down_reg_entrez_all))
+
+# Remove NAs for those which cannot map to an Entrez IDs
+entrez_no_na <- na.omit(FE_genes_down_reg_entrez_all)
+length(entrez_no_na)
+
+# Get unique ones
+FE_genes_down_reg_entrez_unique <- unique(entrez_no_na)
+length(FE_genes_down_reg_entrez_unique)
+```
+
+
+
 Gene Ontology (GO) over representation analysis (ORA)
 1. Biological Processes (BP)
 2. Molecular Function (MF)
