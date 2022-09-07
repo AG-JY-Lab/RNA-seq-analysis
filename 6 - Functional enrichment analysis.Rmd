@@ -66,7 +66,7 @@ The unique Ensembl and Entrez IDs can be retrieve from the up_reg and down_reg d
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 FE_genes_up_reg_cpm_filtered <- RNA_seq_DE_cpm_filtered_annotated %>% dplyr::filter(
   padj < padj_cutoff 
-  & log2FoldChange > 1
+  & log2FoldChange > l2fc_cutoff
   )
 
 # The Row.names column contain the Ensembl IDs
@@ -89,7 +89,7 @@ length(FE_genes_up_reg_entrez_unique)
 
 FE_genes_down_reg_cpm_filtered <- RNA_seq_DE_cpm_filtered_annotated %>% dplyr::filter(
   padj < padj_cutoff 
-  & log2FoldChange < -1
+  & log2FoldChange < -l2fc_cutoff
   )
 
 # The Row.names column contain the Ensembl IDs
