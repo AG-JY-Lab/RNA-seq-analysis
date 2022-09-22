@@ -14,6 +14,8 @@
 
 > Ensure that you have [renv](https://rstudio.github.io/renv/index.html) installed as this will the main environment management tool used in this workflow. The packages used in the analysis can be easily obtained with `renv::restore()` and this will download them by referencing the `renv.lock` file.
 
+> **For Windows:** Some of the tools / packages in this analysis workflow might need to be built from source and the respective compilers for C/C++ & Fortran are nicely bundled within [`Rtools`](https://cran.r-project.org/bin/windows/Rtools/rtools42/rtools.html) for Windows. [`Rtools`](https://cran.r-project.org/bin/windows/Rtools/rtools42/rtools.html) can be installed by running the Rtools42 installer.
+
 > Although this is not a standalone package for bulk RNA-seq analysis but more of a pipeline that integrates multiple tools together, there are some helper functions that were written as R source code within the `/src` directory. In order to load them for use in the analysis, run `source(here::here("src", "RNA_seq_helper_functions.R"))` at the start of each Rmd notebook to ensure the necessary helper functions are loaded too.
 
 > The read count tab data are expected as outputs from [STAR](https://github.com/alexdobin/STAR) with its `--quantMode GeneCounts` flag turned on. As such, the format for the data would be a few `_outputs_ReadsPerGene.out.tab` files according to the number of RNA-seq samples. These should be placed in the `/data` folder along with a tab delimited metadata text file which the user has to provide for DESeq2 to build it's deseq_object.
